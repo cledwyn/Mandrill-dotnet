@@ -35,8 +35,6 @@ namespace Mandrill
         /// <returns></returns>
         public Task<List<EmailResult>> SendMessageAsync(IEnumerable<EmailAddress> recipients, string subject, string content, EmailAddress from)
         {
-            var path = "/messages/send.json";
-
             var message = new EmailMessage()
             {
                 to = recipients,
@@ -47,15 +45,26 @@ namespace Mandrill
                 auto_text = true,
             };
 
+            return SendMessageAsync(message);
+        }
+
+        /// <summary>
+        /// Send Mandrill Message Object to /messages/send.json endpoint
+        /// </summary>
+        /// <param name="message">Fully loaded Email Message object</param>
+        /// <returns></returns>
+        public Task<List<EmailResult>> SendMessageAsync(EmailMessage message)
+        {
+            var path = "/messages/send.json";
             dynamic payload = new ExpandoObject();
             payload.message = message;
-            
+
             Task<IRestResponse> post = PostAsync(path, payload);
 
             return post.ContinueWith(p =>
             {
                 return JSON.Parse<List<EmailResult>>(p.Result.Content);
-            }, TaskContinuationOptions.ExecuteSynchronously);            
+            }, TaskContinuationOptions.ExecuteSynchronously);
         }
 
         /// <summary>
