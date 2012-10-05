@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RestSharp;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -43,7 +44,7 @@ namespace Mandrill
         public string from_email { get; set; }
         public string from_name { get; set; }
         public IEnumerable<EmailAddress> to { get; set; }
-        public string headers { get; set; }
+        public JsonObject headers { get; private set; }
         public bool track_opens { get; set; }
         public bool track_clicks { get; set; }
         public bool auto_text { get; set; }
@@ -75,6 +76,16 @@ namespace Mandrill
             global_merge_vars.Add(mv);
         }
 
+        public void AddHeader(string name, string value)
+        {
+            if (this.headers == null)
+            {
+                this.headers = new JsonObject();
+            }
+
+            this.headers[name] = value;
+        }
+
         public void AddRecipientVariable(string recipient, string name, string content)
         {
             if (merge_vars == null)
@@ -85,7 +96,7 @@ namespace Mandrill
             var entry = merge_vars.Where(e => e.rcpt == recipient).FirstOrDefault();
             if (entry == null)
             {
-                entry = new rcpt_merge_var();
+                entry = new rcpt_merge_var{rcpt = recipient};
                 merge_vars.Add(entry);
             }
 
